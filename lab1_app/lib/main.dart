@@ -1,122 +1,173 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'models/bank_account.dart';
+import 'models/book.dart';
+import 'models/library.dart';
+import 'models/library_item.dart';
+import 'models/magazine.dart';
+import 'models/user.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const LabTwoApp());
 
-  // This widget is the root of your application.
+class LabTwoApp extends StatelessWidget {
+  const LabTwoApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ADMD Lab2',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'My first app'),
+      home: const LabHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class LabHomePage extends StatefulWidget {
+  const LabHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<LabHomePage> createState() => _LabHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _LabHomePageState extends State<LabHomePage> {
+  final List<User> users = [
+    User(name: 'Mairal Miral', age: 21, email: 'mairal@email.com'),
+    User(name: 'MirceaCe lBatran', age: 19),
+    User(name: 'Stanescu Lata'),
+  ];
 
-  void _incrementCounter() {
+  late final List<BankAccount> accounts = _createAccounts();
+  late final Library library = _createLibrary();
+
+  List<BankAccount> _createAccounts() {
+    final first = BankAccount(
+      holderName: 'Mairal Miral',
+      balance: 1250.50,
+      bankBranch: 'Bucharest',
+    )..initializeAccount('RO-1001');
+
+    final second = BankAccount(
+      holderName: 'MirceaCe lBatran',
+      bankBranch: null,
+    )..initializeAccount('RO-1002');
+
+// Demonstrates a late field that has not yet been initialized.
+    final third = BankAccount(holderName: 'Stanescu Lata');
+
+    return [first, second, third];
+  }
+
+  Library _createLibrary() {
+    final result = Library();
+    result.addItem(Book(
+      title: 'Cum sa?',
+      author: 'Adina Druica',
+      publishDate: DateTime(2025, 3, 12),
+      pageCount: 240,
+      isbn: '978-1-23456-789-0',
+    ));
+    result.addItem(Book(
+      title: 'Azi maine, maine azi',
+      author: 'Adina Druica',
+      publishDate: DateTime(2024, 8, 4),
+      pageCount: null,
+    ));
+    result.addItem(Magazine(
+      title: 'Te pui cu saracii?',
+      author: null,
+      publishDate: DateTime(2026, 1, 15),
+      issueNumber: 18,
+      publisher: 'Tech Press',
+    ));
+    return result;
+  }
+
+  void _toggleBorrow(LibraryItem item) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      if (item.isBorrowed) {
+        library.returnItem(item.title);
+      } else {
+        library.borrowItem(
+          item.title,
+          users.first,
+          dueDate: DateTime.now().add(const Duration(days: 14)),
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final recentItems =
+        library.getRecentItems(since: DateTime(2025, 1, 1));
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      appBar: AppBar(title: const Text('ADMD Lab 2 — Dart & Null Safety')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('Users', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          ...users.map((user) => Card(
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: Text(user.name),
+                  subtitle: Text(
+                    'Age: ${user.getDisplayAge()}\n'
+                    'Email: ${user.email ?? "Not provided"}',
+                  ),
+                  isThreeLine: true,
+                ),
+              )),
+          const Divider(height: 32),
+          Text('Bank accounts',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          ...accounts.map((account) => Card(
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.account_balance)),
+                  title: Text(account.holderName),
+                  subtitle: Text(
+                    'Account: ${account.getDisplayAccountNumber()}\n'
+                    'Branch: ${account.getDisplayBranch()}\n'
+                    'Balance: ${account.balance.toStringAsFixed(2)}',
+                  ),
+                  isThreeLine: true,
+                ),
+              )),
+          const Divider(height: 32),
+          Text('Library',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text('${library.items.length} items • ${recentItems.length} recent since 2025'),
+          const SizedBox(height: 8),
+          ...library.items.map((item) => Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Icon(item is Book ? Icons.menu_book : Icons.article),
+                  ),
+                  title: Text(item.title),
+                  subtitle: Text(
+                    '${item.details}\n'
+                    '${item.isBorrowed ? "Borrowed by: ${item.borrower?.name ?? "Unknown"}" : "Available"}'
+                    '${item.dueDate == null ? "" : "\nDue: ${item.dueDate!.toLocal().toString().split(" ").first}"}',
+                  ),
+                  isThreeLine: true,
+                  trailing: TextButton(
+                    onPressed: () => _toggleBorrow(item),
+                    child: Text(item.isBorrowed ? 'Return' : 'Borrow'),
+                  ),
+                ),
+              )),
+          const SizedBox(height: 8),
+          
+        ],
       ),
     );
   }
 }
+
+
